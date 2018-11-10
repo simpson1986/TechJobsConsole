@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TechJobsConsole
 {
@@ -22,8 +23,6 @@ namespace TechJobsConsole
          */
         public static List<string> FindAll(string column)
         {
-            LoadData();
-
             List<string> values = new List<string>();
 
             foreach (Dictionary<string, string> job in AllJobs)
@@ -38,25 +37,37 @@ namespace TechJobsConsole
             return values;
         }
 
-        public static List<Dictionary<string, string>> FindByColumnAndValue(string column, string value)
-        {
-            // load data, if not already loaded
-            LoadData();
 
+        public static List<Dictionary<string, string>> FindByValue(string value)
+        {
+            //search for a string within each of the columns
+            // testing:
+            LoadData();
             List<Dictionary<string, string>> jobs = new List<Dictionary<string, string>>();
 
             foreach (Dictionary<string, string> row in AllJobs)
             {
-                string aValue = row[column];
-
-                if (aValue.Contains(value))
+                foreach (KeyValuePair<string, string> element in row)
                 {
-                    jobs.Add(row);
+                    Regex x = new Regex(value, RegexOptions.IgnoreCase);
+                    string aValue = element.ToString();
+                    if (x.IsMatch(aValue))
+                    {
+                        jobs.Add(row);
+                    }
                 }
+
+                }
+            if (jobs.Count == 0)
+            {
+                System.Console.WriteLine("NO RESULTS/ PLease try again");
             }
 
             return jobs;
         }
+
+
+        
 
         /*
          * Load and parse data from job_data.csv
@@ -137,6 +148,32 @@ namespace TechJobsConsole
             valueBuilder.Clear();
 
             return rowValues.ToArray();
+        }
+        public static List<Dictionary<string, string>> FindByColumnAndValue(string column, string value)
+        {
+            // load data, if not already loaded
+            LoadData();
+
+            List<Dictionary<string, string>> jobs = new List<Dictionary<string, string>>();
+
+            foreach (Dictionary<string, string> row in AllJobs)
+            {
+                string aValue = row[column];
+
+                Regex x = new Regex(value, RegexOptions.IgnoreCase);
+
+                if (x.IsMatch(aValue))
+                {
+                    jobs.Add(row);
+                }
+
+
+            }
+            if (jobs.Count == 0)
+            {
+                System.Console.WriteLine("NO RESULTS");
+            }
+            return jobs;
         }
     }
 }
